@@ -15,9 +15,14 @@ fi
 clone() {
 	local plugin="$1"
 	local branch="$2"
+	local dirname="$(basename "$1")"
 	if [ -n "$branch" ]; then
 		cd "$(tpm_path)" &&
-			GIT_TERMINAL_PROMPT=0 git clone -b "$branch" --single-branch --recursive "$plugin" >/dev/null 2>&1
+			rm -rf -- "./$dirname" &&
+			GIT_TERMINAL_PROMPT=0 git init "./$dirname" >/dev/null 2>&1 &&
+			GIT_TERMINAL_PROMPT=0 git -C "./$dirname" remote add origin "$plugin" >/dev/null 2>&1 &&
+			GIT_TERMINAL_PROMPT=0 git -C "./$dirname" fetch --depth 1 origin "$branch" >/dev/null 2>&1 &&
+			GIT_TERMINAL_PROMPT=0 git -C "./$dirname" checkout --recurse-submodules FETCH_HEAD >/dev/null 2>&1
 	else
 		cd "$(tpm_path)" &&
 			GIT_TERMINAL_PROMPT=0 git clone --single-branch --recursive "$plugin" >/dev/null 2>&1
